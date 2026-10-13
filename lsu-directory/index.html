@@ -1,0 +1,1712 @@
+<!DOCTYPE html>
+<!--
+  Black-Owned BR — LSU Student Directory
+  Single-file release: HTML + CSS (in <style>) + JavaScript (in <script>).
+  Runs directly in any browser (file://) with zero dependencies or build steps.
+-->
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <title>Black-Owned BR — Local businesses near LSU</title>
+  <meta name="description" content="Find Black-owned stylists, nail techs, lash artists, photographers, fashion brands and food spots within 25 miles of LSU in Baton Rouge." />
+  <meta name="theme-color" content="#FFF3EF" />
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🌸</text></svg>" />
+
+  <!-- Google Fonts: Bricolage Grotesque (variable: opsz, wdth 75..100, wght 400..800) -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wdth,wght@12..96,75..100,400..800&display=swap" rel="stylesheet" />
+
+  <style>
+/* =========================================================
+   DESIGN TOKENS & ROOT VARIABLES
+   ========================================================= */
+:root {
+  /* Palette */
+  --blush: #F6CFC8;          /* blush rose */
+  --blush-soft: #FFF3EF;     /* page background */
+  --orange: #F58025;         /* Princeton orange: primary buttons, highlights */
+  --orange-hover: #FF9447;
+  --pistachio: #DDE8B9;      /* pistachio cream: student-deal tags */
+  --pistachio-deep: #5E7A22;
+  --ink: #2A1630;            /* aubergine text, nod to LSU purple */
+  --ink-muted: #6B5570;
+  --white: #FFFFFF;
+
+  /* Category colors */
+  --cat-hair: var(--blush);
+  --cat-nails: #FBD9B5;
+  --cat-lashes: #E7D3F0;
+  --cat-fashion: var(--pistachio);
+  --cat-photography: #CFE3EC;
+  --cat-food: #FFE08A;
+
+  /* Typography */
+  --font: "Bricolage Grotesque", "Avenir Next", "Segoe UI", system-ui, sans-serif;
+  --text-xs: 0.75rem;
+  --text-sm: 0.875rem;
+  --text-base: 1rem;
+  --text-md: 1.25rem;
+  --text-lg: 1.563rem;
+  --text-xl: clamp(1.9rem, 5.5vw, 3rem);
+  --text-display: clamp(2.75rem, 11vw, 6rem);
+
+  /* Spacing & Geometry */
+  --space-2xs: 0.25rem;
+  --space-xs: 0.5rem;
+  --space-s: 0.75rem;
+  --space-m: 1.25rem;
+  --space-l: 2rem;
+  --space-xl: 3.5rem;
+  --radius-pill: 999px;
+  --radius: 1rem;
+  --line: 2px solid var(--ink);
+  --header-h: 4rem;
+  --max-width: 76rem;
+
+  /* Dynamic tray offset */
+  --tray-height: 0px;
+}
+
+/* ---------- Reset & Base ---------- */
+*, *::before, *::after { box-sizing: border-box; }
+* { margin: 0; }
+html {
+  -webkit-text-size-adjust: 100%;
+  scroll-behavior: smooth;
+  scroll-padding-top: calc(var(--header-h) + 4rem + env(safe-area-inset-top, 0px));
+}
+body {
+  font-family: var(--font);
+  font-size: var(--text-base);
+  line-height: 1.55;
+  color: var(--ink);
+  background: var(--blush-soft);
+  padding-bottom: calc(var(--tray-height) + env(safe-area-inset-bottom, 0px) + 1rem);
+  overflow-x: hidden;
+}
+img, svg { display: block; max-width: 100%; }
+input, button, select, textarea { font: inherit; color: inherit; }
+ul[class] { list-style: none; padding: 0; }
+a { color: inherit; }
+fieldset { border: 0; padding: 0; min-width: 0; }
+
+:focus-visible {
+  outline: 3px solid var(--orange);
+  outline-offset: 3px;
+}
+
+.visually-hidden {
+  position: absolute !important;
+  width: 1px; height: 1px;
+  overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap;
+}
+.skip-link {
+  position: absolute; left: var(--space-s); top: -100px; z-index: 100;
+  background: var(--ink); color: var(--white);
+  padding: var(--space-xs) var(--space-m); border-radius: var(--radius-pill);
+}
+.skip-link:focus { top: var(--space-s); }
+
+.container {
+  width: 100%;
+  max-width: var(--max-width);
+  margin-inline: auto;
+  padding-inline: var(--space-m);
+}
+
+.section-title {
+  font-size: var(--text-xl);
+  font-weight: 800;
+  font-variation-settings: "wdth" 80;
+  line-height: 1.05;
+  letter-spacing: -0.01em;
+}
+
+/* ---------- Interactive Buttons ---------- */
+.btn {
+  display: inline-flex; align-items: center; justify-content: center;
+  gap: var(--space-2xs);
+  min-height: 44px;             /* 44px minimum thumb target */
+  padding: 0 var(--space-m);
+  border: var(--line);
+  border-radius: var(--radius-pill);
+  font-weight: 700;
+  font-size: var(--text-sm);
+  text-decoration: none;
+  white-space: nowrap;
+  cursor: pointer;
+  transition: background-color 140ms ease, transform 120ms ease, color 140ms ease;
+}
+.btn:active { transform: translateY(1px); }
+.btn--primary { background: var(--orange); color: var(--ink); }
+.btn--primary:hover { background: var(--orange-hover); }
+.btn--ghost { background: transparent; }
+.btn--ghost:hover { background: var(--blush-soft); }
+.btn--dark { background: var(--ink); color: var(--white); }
+.btn--dark:hover { background: #3d2046; }
+.btn--copy.is-copied {
+  background: var(--pistachio) !important;
+  color: var(--pistachio-deep) !important;
+}
+
+/* =========================================================
+   1. STICKY HEADER
+   ========================================================= */
+.site-header {
+  position: sticky; top: 0; z-index: 20;
+  padding-top: env(safe-area-inset-top, 0px);
+  background: color-mix(in srgb, var(--blush-soft) 94%, transparent);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border-bottom: 1px solid color-mix(in srgb, var(--ink) 14%, transparent);
+}
+.site-header__inner {
+  display: flex; align-items: center; justify-content: space-between;
+  gap: var(--space-m);
+  height: var(--header-h);
+}
+.logo {
+  display: flex; align-items: center; gap: var(--space-xs);
+  white-space: nowrap;
+  font-size: var(--text-md);
+  font-weight: 800;
+  font-variation-settings: "wdth" 80;
+  text-decoration: none;
+}
+.logo__mark {
+  width: 1.4rem; height: 1.4rem;
+  border: var(--line);
+  border-radius: 50% 50% 50% 0;  /* small orange teardrop shape */
+  background: var(--orange);
+}
+.nav { display: flex; align-items: center; gap: var(--space-m); }
+.nav a { font-weight: 600; text-decoration: none; font-size: var(--text-sm); }
+.nav__item--desktop-only { display: none; }
+.nav__cta {
+  display: inline-block;
+  padding: var(--space-xs) var(--space-m);
+  border-radius: var(--radius-pill);
+  background: var(--ink);
+  color: var(--white);
+  font-size: var(--text-sm);
+  font-weight: 700;
+  white-space: nowrap;
+  border: var(--line);
+}
+
+/* =========================================================
+   2. INTRO + IMPACT COUNTER
+   ========================================================= */
+.intro { padding-block: var(--space-l) var(--space-l); }
+.intro__inner { display: grid; gap: var(--space-l); min-width: 0; }
+.intro__text { min-width: 0; }
+
+.intro__title {
+  font-size: var(--text-display);
+  font-weight: 800;
+  font-variation-settings: "wdth" 75, "opsz" 96;
+  line-height: 0.92;
+  letter-spacing: -0.03em;
+}
+.intro__tagline {
+  margin-top: var(--space-s);
+  max-width: 32ch;
+  font-size: var(--text-lg);
+  font-weight: 800;
+  font-variation-settings: "wdth" 82;
+  line-height: 1.22;
+}
+.intro__lede {
+  margin-top: var(--space-xs);
+  max-width: 44ch;
+  font-size: var(--text-md);
+  color: var(--ink-muted);
+}
+
+.search {
+  margin-top: var(--space-m);
+  max-width: 32rem;
+  background: var(--white);
+  border: var(--line);
+  border-radius: var(--radius-pill);
+}
+.search:focus-within { outline: 3px solid var(--orange); outline-offset: 3px; }
+.search__input {
+  width: 100%;
+  min-height: 44px;
+  padding: 0 var(--space-m);
+  border: 0;
+  background: transparent;
+  font-size: 1rem;              /* ≥16px prevents iOS zoom on focus */
+}
+.search__input:focus { outline: none; }
+
+/* Impact counter: 2px ink grid lines */
+.impact {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 2px;
+  background: var(--ink);
+  border: var(--line);
+  border-radius: var(--radius);
+  overflow: hidden;
+  min-width: 0;
+}
+.impact__item {
+  display: flex; flex-direction: column-reverse; justify-content: flex-end;
+  gap: var(--space-2xs);
+  padding: var(--space-m);
+  background: var(--white);
+}
+.impact__item--lead { grid-column: 1 / -1; background: var(--orange); }
+.impact__item:nth-child(2) { background: var(--white); }
+.impact__item:nth-child(3) { background: var(--pistachio); }
+.impact__item:nth-child(4) { background: var(--blush); grid-column: 1 / -1; }
+.impact dt { font-size: var(--text-sm); font-weight: 700; line-height: 1.3; }
+.impact dd {
+  font-size: var(--text-xl);
+  font-weight: 800;
+  font-variation-settings: "wdth" 75;
+  line-height: 1;
+  font-variant-numeric: tabular-nums;
+}
+.impact__item--lead dd { font-size: clamp(3rem, 13vw, 5rem); }
+
+/* =========================================================
+   3. DASHBOARD (SIDEBAR + RESULTS)
+   ========================================================= */
+.dashboard {
+  display: grid;
+  gap: var(--space-m);
+  padding-bottom: var(--space-xl);
+}
+.dashboard > * { min-width: 0; }
+
+.filter-title {
+  font-weight: 800;
+  font-size: var(--text-md);
+  font-variation-settings: "wdth" 85;
+  margin-bottom: var(--space-s);
+}
+
+/* Proximity zones */
+.zone-filter__options {
+  display: flex;
+  gap: var(--space-xs);
+  overflow-x: auto;
+  padding: 4px;
+  margin: -4px;
+  scrollbar-width: none;
+  scroll-snap-type: x proximity;
+}
+.zone-filter__options::-webkit-scrollbar { display: none; }
+
+.zone {
+  flex: 0 0 auto;
+  scroll-snap-align: start;
+  display: flex; flex-direction: column;
+  min-width: 8.5rem;
+  padding: var(--space-s) var(--space-m);
+  border: var(--line);
+  border-radius: var(--radius);
+  background: var(--white);
+  cursor: pointer;
+  transition: background-color 120ms ease;
+}
+.zone__name { font-weight: 700; }
+.zone__range { font-size: var(--text-sm); color: var(--ink-muted); }
+.zone:hover { background: var(--blush-soft); }
+input:checked + .zone { background: var(--ink); color: var(--white); }
+input:checked + .zone .zone__range { color: var(--blush); }
+input:focus-visible + .zone { outline: 3px solid var(--orange); outline-offset: 3px; }
+
+.toggle {
+  display: flex; align-items: center; gap: var(--space-xs);
+  margin-top: var(--space-m);
+  font-weight: 700;
+  font-size: var(--text-sm);
+  cursor: pointer;
+}
+.toggle input {
+  width: 1.25rem; height: 1.25rem;
+  accent-color: var(--pistachio-deep);
+  cursor: pointer;
+}
+
+/* Category bar: sticky under header */
+.category-bar {
+  position: sticky;
+  top: calc(var(--header-h) + env(safe-area-inset-top, 0px));
+  z-index: 10;
+  margin-inline: calc(var(--space-m) * -1);
+  padding: var(--space-s) var(--space-m);
+  background: var(--blush-soft);
+}
+.category-bar__scroll {
+  display: flex;
+  gap: var(--space-xs);
+  overflow-x: auto;
+  padding: 4px;
+  margin: -4px;
+  scrollbar-width: none;
+}
+.category-bar__scroll::-webkit-scrollbar { display: none; }
+
+.chip {
+  flex: 0 0 auto;
+  display: inline-flex; align-items: center; gap: var(--space-xs);
+  min-height: 44px;
+  padding: 0 var(--space-m);
+  border: var(--line);
+  border-radius: var(--radius-pill);
+  background: var(--chip, var(--white));
+  font-weight: 700;
+  white-space: nowrap;
+  cursor: pointer;
+  transition: background-color 120ms ease, color 120ms ease;
+}
+.chip__count {
+  min-width: 1.6em;
+  padding: 0 0.45em;
+  border: 1.5px solid var(--ink);
+  border-radius: var(--radius-pill);
+  background: var(--white);
+  color: var(--ink);
+  font-size: 0.8rem;
+  text-align: center;
+}
+input:checked + .chip {
+  background: var(--ink) !important;
+  color: var(--white);
+  box-shadow: inset 0 -4px 0 var(--chip);
+}
+input:checked + .chip .chip__count {
+  background: var(--white);
+  color: var(--ink);
+}
+input:focus-visible + .chip { outline: 3px solid var(--orange); outline-offset: 3px; }
+
+/* Hair sub-filter panel */
+.hair-filter {
+  margin-top: var(--space-m);
+  padding: var(--space-m);
+  background: var(--blush);
+  border: var(--line);
+  border-radius: var(--radius);
+}
+.hair-filter[hidden] { display: none; }
+.hair-filter .filter-title { margin-bottom: var(--space-xs); font-size: var(--text-sm); }
+.check-list { display: flex; flex-wrap: wrap; gap: var(--space-xs); }
+.check-pill {
+  display: inline-flex; align-items: center;
+  min-height: 38px;
+  padding: 0 var(--space-s);
+  border: var(--line);
+  border-radius: var(--radius-pill);
+  background: var(--white);
+  font-size: var(--text-sm);
+  font-weight: 600;
+  cursor: pointer;
+}
+input:checked + .check-pill {
+  background: var(--ink);
+  color: var(--white);
+}
+input:focus-visible + .check-pill { outline: 3px solid var(--orange); outline-offset: 3px; }
+
+/* Results header */
+.results__head {
+  display: flex; flex-wrap: wrap; align-items: flex-end;
+  justify-content: space-between;
+  gap: var(--space-xs);
+  margin-block: var(--space-m);
+}
+.results__count { font-weight: 600; color: var(--ink-muted); }
+.sort { display: flex; align-items: center; gap: var(--space-xs); font-size: var(--text-sm); font-weight: 700; }
+.sort select {
+  min-height: 40px;
+  padding: 0 var(--space-s);
+  border: var(--line);
+  border-radius: var(--radius-pill);
+  background: var(--white);
+  font-weight: 600;
+  font-size: var(--text-sm);
+  cursor: pointer;
+}
+
+/* Card Grid & Provider Card */
+.card-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, 19rem), 1fr));
+  gap: var(--space-m);
+}
+
+.card {
+  display: flex; flex-direction: column;
+  background: var(--white);
+  border: var(--line);
+  border-radius: var(--radius);
+  overflow: hidden;
+  box-shadow: none;              /* NO drop shadows */
+  transition: transform 120ms ease;
+  cursor: pointer;
+}
+.card.is-highlighted {
+  outline: 4px solid var(--orange) !important;
+  outline-offset: 3px;
+}
+.card__top {
+  display: flex; justify-content: space-between; align-items: center;
+  padding: var(--space-xs) var(--space-m);
+  background: var(--chip, var(--blush));
+  border-bottom: var(--line);
+  font-size: var(--text-sm);
+  font-weight: 700;
+}
+.card__dist { font-variant-numeric: tabular-nums; white-space: nowrap; }
+.card__body {
+  display: flex; flex-direction: column; gap: var(--space-s);
+  flex: 1;
+  padding: var(--space-m);
+}
+.card__name {
+  font-size: var(--text-lg);
+  font-weight: 800;
+  font-variation-settings: "wdth" 82;
+  line-height: 1.15;
+  overflow-wrap: anywhere;
+  word-break: break-word;
+}
+.badge--guess {
+  align-self: flex-start;
+  font-size: var(--text-xs);
+  font-weight: 700;
+  background: #f0ecf4;
+  color: var(--ink-muted);
+  border: 1px dashed var(--ink-muted);
+  border-radius: var(--radius-pill);
+  padding: 0.15em 0.55em;
+  margin-top: -0.25rem;
+}
+.card__desc { color: var(--ink-muted); font-size: var(--text-sm); }
+
+.tags { display: flex; flex-wrap: wrap; gap: var(--space-xs); }
+.tag {
+  padding: 0.15em 0.7em;
+  border: 1.5px solid color-mix(in srgb, var(--ink) 25%, transparent);
+  border-radius: var(--radius-pill);
+  background: var(--blush-soft);
+  font-size: var(--text-sm);
+  font-weight: 600;
+}
+.tag--deal { background: var(--pistachio); border-color: var(--pistachio-deep); color: var(--pistachio-deep); }
+
+.card__unverified {
+  border-left: 3px solid var(--orange);
+  background: color-mix(in srgb, var(--blush-soft) 85%, white);
+  padding: var(--space-xs) var(--space-s);
+  border-radius: 0 0.5rem 0.5rem 0;
+  font-size: var(--text-sm);
+  color: var(--ink);
+  line-height: 1.35;
+}
+
+.card__details {
+  display: grid; gap: var(--space-s);
+  padding: var(--space-s);
+  border-radius: calc(var(--radius) / 2);
+  background: var(--blush-soft);
+  font-size: var(--text-sm);
+  border: 1px dashed color-mix(in srgb, var(--ink) 25%, transparent);
+}
+.card__details[hidden] { display: none; }
+.card__details h4 { font-size: var(--text-sm); color: var(--ink-muted); }
+.card__details ul { padding-left: 1.1em; }
+
+.card__actions {
+  display: flex; flex-wrap: wrap; gap: var(--space-xs);
+  margin-top: auto;
+  padding-top: var(--space-xs);
+}
+.card__actions .btn { flex: 1 1 auto; padding: 0 0.85rem; font-size: var(--text-sm); }
+.card__actions .btn--copy { flex-basis: 100%; min-height: 44px; }
+.card__actions .btn--details { flex-basis: 100%; }
+
+.empty-state {
+  display: grid; justify-items: start; gap: var(--space-m);
+  padding: var(--space-l);
+  border: 2px dashed var(--ink);
+  border-radius: var(--radius);
+  background: var(--white);
+}
+.empty-state[hidden] { display: none; }
+
+/* =========================================================
+   4. LIST YOUR BUSINESS (CTA BAND)
+   ========================================================= */
+.cta-band {
+  margin-top: var(--space-xl);
+  padding-block: var(--space-xl);
+  background: var(--orange);
+  border-block: var(--line);
+}
+.cta-band__inner { display: grid; justify-items: start; gap: var(--space-s); }
+.cta-band p { max-width: 44ch; font-size: var(--text-md); }
+
+/* =========================================================
+   5. MEET THE CREATORS
+   ========================================================= */
+.creators { padding-block: var(--space-xl); }
+.creators__lede {
+  margin-top: var(--space-s);
+  max-width: 54ch;
+  font-size: var(--text-md);
+  color: var(--ink-muted);
+}
+.creator-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, 16rem), 1fr));
+  gap: var(--space-m);
+  margin-top: var(--space-l);
+}
+.creator {
+  display: flex; align-items: flex-start; gap: var(--space-m);
+  padding: var(--space-m);
+  border: var(--line);
+  border-radius: var(--radius);
+  background: var(--white);
+}
+.creator__avatar {
+  flex: 0 0 auto;
+  display: grid; place-items: center;
+  width: 3.5rem; height: 3.5rem;
+  border: var(--line);
+  border-radius: 50% 50% 50% 0;   /* teardrop avatar echoing logo */
+  background: var(--chip, var(--blush));
+  font-weight: 800;
+  font-size: var(--text-md);
+}
+.creator__name { font-size: var(--text-md); font-weight: 800; line-height: 1.2; }
+.creator__role { font-weight: 600; font-size: var(--text-sm); }
+.creator__meta { font-size: var(--text-sm); color: var(--ink-muted); }
+.creator__link {
+  display: inline-block;
+  margin-top: var(--space-xs);
+  font-size: var(--text-sm);
+  font-weight: 700;
+  text-decoration-color: var(--orange);
+  text-decoration-thickness: 2px;
+  text-underline-offset: 3px;
+}
+
+.site-footer {
+  padding-block: var(--space-l);
+  border-top: 1px solid color-mix(in srgb, var(--ink) 14%, transparent);
+  font-size: var(--text-sm);
+  color: var(--ink-muted);
+}
+
+/* =========================================================
+   6. RECENTLY VIEWED TRAY (BOTTOM FIXED)
+   ========================================================= */
+.tray {
+  position: fixed;
+  left: 0; right: 0; bottom: 0;
+  z-index: 50;
+  background: var(--white);
+  border-top: var(--line);
+  box-shadow: 0 -4px 20px rgba(42, 22, 48, 0.12);
+  transition: transform 180ms ease;
+}
+.tray[hidden] { display: none; }
+.tray__header {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: var(--space-xs) var(--space-m);
+  background: var(--white);
+  border-bottom: 1px solid color-mix(in srgb, var(--ink) 12%, transparent);
+}
+.tray__toggle {
+  display: inline-flex; align-items: center; gap: var(--space-xs);
+  background: none; border: 0;
+  font-weight: 800; font-size: var(--text-sm);
+  cursor: pointer;
+  padding: 0;
+}
+.tray__badge {
+  background: var(--orange);
+  color: var(--ink);
+  font-size: var(--text-xs);
+  font-weight: 800;
+  padding: 0.1em 0.55em;
+  border-radius: var(--radius-pill);
+  border: 1.5px solid var(--ink);
+}
+.tray__chevron {
+  display: inline-block;
+  font-size: 0.75rem;
+  transition: transform 180ms ease;
+}
+.tray--collapsed .tray__chevron {
+  transform: rotate(180deg);
+}
+.tray--collapsed .tray__body {
+  display: none;
+}
+.tray__clear {
+  background: none; border: 0; padding: 0;
+  font-size: var(--text-sm); font-weight: 600;
+  color: var(--ink-muted);
+  text-decoration: underline; text-underline-offset: 3px;
+  cursor: pointer;
+}
+.tray__body {
+  padding: var(--space-s) var(--space-m);
+  background: var(--blush-soft);
+}
+.tray__scroll {
+  display: flex;
+  gap: var(--space-s);
+  overflow-x: auto;
+  scroll-snap-type: x proximity;
+  padding-bottom: 4px;
+}
+.tray-card {
+  flex: 0 0 13.5rem;
+  width: 13.5rem;
+  scroll-snap-align: start;
+  position: relative;
+  display: flex; flex-direction: column; gap: var(--space-2xs);
+  padding: var(--space-s);
+  border: var(--line);
+  border-radius: var(--radius);
+  background: var(--chip, var(--white));
+  font-size: var(--text-sm);
+  cursor: pointer;
+}
+.tray-card__top {
+  display: flex; align-items: flex-start; justify-content: space-between;
+  gap: var(--space-xs);
+}
+.tray-card__name {
+  font-weight: 800;
+  font-size: var(--text-sm);
+  line-height: 1.2;
+  overflow-wrap: anywhere;
+}
+.tray-card__remove {
+  background: var(--white);
+  border: 1.5px solid var(--ink);
+  border-radius: var(--radius-pill);
+  width: 1.4rem; height: 1.4rem;
+  display: grid; place-items: center;
+  font-size: var(--text-xs);
+  font-weight: 800;
+  line-height: 1;
+  cursor: pointer;
+  flex: 0 0 auto;
+}
+.tray-card__cat {
+  font-weight: 600;
+  font-size: var(--text-xs);
+  color: var(--ink-muted);
+}
+.tray-card__table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: var(--space-2xs);
+  font-size: var(--text-xs);
+}
+.tray-card__table td {
+  padding: 1px 0;
+}
+.tray-card__table td:last-child {
+  text-align: right;
+  font-weight: 700;
+}
+
+/* =========================================================
+   7. TOAST NOTIFICATION
+   ========================================================= */
+.toast {
+  position: fixed;
+  left: 50%;
+  bottom: calc(var(--tray-height) + 1.25rem);
+  transform: translateX(-50%) translateY(16px);
+  z-index: 60;
+  display: flex; align-items: center; gap: var(--space-s);
+  max-width: min(92vw, 32rem);
+  padding: var(--space-s) var(--space-m);
+  background: var(--ink);
+  color: var(--white);
+  border: 2px solid var(--orange);
+  border-radius: var(--radius-pill);
+  box-shadow: 0 8px 24px rgba(42, 22, 48, 0.35);
+  font-size: var(--text-sm);
+  font-weight: 600;
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 180ms ease, transform 180ms ease, visibility 180ms ease;
+  pointer-events: none;
+}
+.toast.is-visible {
+  opacity: 1;
+  visibility: visible;
+  transform: translateX(-50%) translateY(0);
+  pointer-events: auto;
+}
+.toast__link {
+  display: inline-flex; align-items: center; justify-content: center;
+  min-height: 32px;
+  padding: 0 var(--space-s);
+  background: var(--orange);
+  color: var(--ink);
+  border-radius: var(--radius-pill);
+  font-size: var(--text-xs);
+  font-weight: 800;
+  text-decoration: none;
+  white-space: nowrap;
+}
+
+/* =========================================================
+   RESPONSIVE BREAKPOINTS
+   ========================================================= */
+/* Tablet & Up */
+@media (min-width: 40rem) {
+  .nav__item--desktop-only { display: list-item; }
+  .impact { grid-template-columns: repeat(3, 1fr); }
+  .impact__item:nth-child(4) { grid-column: auto; }
+}
+
+/* Desktop Sidebar Layout (≥ 60rem) */
+@media (min-width: 60rem) {
+  .intro { padding-block: var(--space-xl); }
+  .intro__inner {
+    grid-template-columns: 1.25fr 1fr;
+    align-items: end;
+  }
+  .impact { grid-template-columns: 1fr 1fr; }
+  .impact__item:nth-child(4) { grid-column: 1 / -1; }
+
+  .dashboard {
+    grid-template-columns: 15.5rem 1fr;
+    gap: var(--space-l);
+    align-items: start;
+  }
+  .sidebar {
+    position: sticky;
+    top: calc(var(--header-h) + var(--space-m) + env(safe-area-inset-top, 0px));
+  }
+  .zone-filter__options {
+    flex-direction: column;
+    overflow: visible;
+  }
+  .zone { min-width: 0; }
+  .category-bar__scroll {
+    flex-wrap: wrap;
+    overflow: visible;
+  }
+}
+
+@media (min-width: 80rem) {
+  .dashboard { grid-template-columns: 17.5rem 1fr; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html { scroll-behavior: auto; }
+  *, *::before, *::after { transition: none !important; animation: none !important; }
+}
+  </style>
+</head>
+<body>
+  <a class="skip-link" href="#results">Skip to directory</a>
+
+  <!-- Global virtual filter form referenced via form="filter-form" -->
+  <form id="filter-form" hidden></form>
+
+  <!-- =======================================================
+       1. STICKY HEADER
+       ======================================================= -->
+  <header class="site-header">
+    <div class="container site-header__inner">
+      <a href="#" class="logo" aria-label="Black-Owned BR home">
+        <span class="logo__mark" aria-hidden="true"></span>
+        <span>Black-Owned BR</span>
+      </a>
+      <nav aria-label="Main Navigation">
+        <ul class="nav">
+          <li><a href="#results">Browse</a></li>
+          <li class="nav__item--desktop-only"><a href="#creators">About</a></li>
+          <li><a href="#list-your-business" class="nav__cta">Get listed</a></li>
+        </ul>
+      </nav>
+    </div>
+  </header>
+
+  <main>
+    <!-- =======================================================
+         2. INTRO + IMPACT COUNTER
+         ======================================================= -->
+    <section class="intro" aria-labelledby="intro-title">
+      <div class="container intro__inner">
+        <div class="intro__text">
+          <h1 id="intro-title" class="intro__title">Support Local LSU</h1>
+          <p class="intro__tagline">
+            Your next lash fill, fit pic and plate are made right here in Baton Rouge.
+          </p>
+          <p class="intro__lede">
+            Black-owned stylists, nail techs, photographers, designers and food spots
+            within 25 miles of campus, sorted by how far you'd have to drive.
+          </p>
+
+          <div class="search">
+            <label for="search-input" class="visually-hidden">Search businesses</label>
+            <input id="search-input" class="search__input" type="search" name="q"
+                   form="filter-form" placeholder='Try "lashes", "grad photos" or a @handle' autocomplete="off" />
+          </div>
+        </div>
+
+        <!-- Dynamic Impact Counter (Computed from data) -->
+        <dl class="impact" aria-label="Directory impact">
+          <div class="impact__item impact__item--lead">
+            <dt>Black-owned businesses listed</dt>
+            <dd data-stat="businesses">17</dd>
+          </div>
+          <div class="impact__item">
+            <dt>Categories</dt>
+            <dd data-stat="categories">6</dd>
+          </div>
+          <div class="impact__item">
+            <dt>Walk or bike from campus</dt>
+            <dd data-stat="campus">4</dd>
+          </div>
+          <div class="impact__item">
+            <dt>Miles from campus, max: 25</dt>
+            <dd data-stat="miles">25</dd>
+          </div>
+        </dl>
+      </div>
+    </section>
+
+    <!-- =======================================================
+         3. DASHBOARD (SIDEBAR + RESULTS)
+         ======================================================= -->
+    <div class="container dashboard">
+
+      <!-- ---------- SIDEBAR ---------- -->
+      <aside class="sidebar" aria-label="Filters">
+        <fieldset class="zone-filter">
+          <legend class="filter-title">How far will you go?</legend>
+          <div class="zone-filter__options">
+            <input type="radio" id="zone-all" name="zone" value="all" form="filter-form" class="visually-hidden" checked />
+            <label for="zone-all" class="zone">
+              <span class="zone__name">Anywhere</span>
+              <span class="zone__range">Up to 25 mi</span>
+            </label>
+
+            <input type="radio" id="zone-campus" name="zone" value="campus" form="filter-form" class="visually-hidden" />
+            <label for="zone-campus" class="zone">
+              <span class="zone__name">Walk or bike</span>
+              <span class="zone__range">Under 2 mi</span>
+            </label>
+
+            <input type="radio" id="zone-near" name="zone" value="near" form="filter-form" class="visually-hidden" />
+            <label for="zone-near" class="zone">
+              <span class="zone__name">Quick drive</span>
+              <span class="zone__range">2–6 mi</span>
+            </label>
+
+            <input type="radio" id="zone-metro" name="zone" value="metro" form="filter-form" class="visually-hidden" />
+            <label for="zone-metro" class="zone">
+              <span class="zone__name">Around BR</span>
+              <span class="zone__range">6–15 mi</span>
+            </label>
+
+            <input type="radio" id="zone-greater" name="zone" value="greater" form="filter-form" class="visually-hidden" />
+            <label for="zone-greater" class="zone">
+              <span class="zone__name">Worth the trip</span>
+              <span class="zone__range">15–25 mi</span>
+            </label>
+          </div>
+        </fieldset>
+
+        <label class="toggle" for="deals-only">
+          <input type="checkbox" id="deals-only" name="dealsOnly" form="filter-form" />
+          <span>🎓 Student deals only</span>
+        </label>
+      </aside>
+
+      <!-- ---------- RESULTS ---------- -->
+      <section id="results" class="results" aria-labelledby="results-title">
+
+        <!-- Sticky category rail -->
+        <fieldset class="category-bar">
+          <legend class="visually-hidden">Category</legend>
+          <div class="category-bar__scroll" id="category-options"><!-- Generated by JS --></div>
+        </fieldset>
+
+        <!-- Hair type sub-filter (Visible ONLY when Hair is selected) -->
+        <fieldset class="hair-filter" id="hair-filter" hidden>
+          <legend class="filter-title">Hair type</legend>
+          <div class="check-list" id="hair-type-options"><!-- Generated by JS --></div>
+        </fieldset>
+
+        <div class="results__head">
+          <div>
+            <h2 id="results-title" class="section-title">All businesses</h2>
+            <p class="results__count" id="result-count" aria-live="polite">17 businesses</p>
+          </div>
+          <div class="sort">
+            <label for="sort-select">Sort by</label>
+            <select id="sort-select" name="sort" form="filter-form">
+              <option value="distance">Closest first</option>
+              <option value="price">Lowest price</option>
+              <option value="experience">Most experience</option>
+            </select>
+          </div>
+        </div>
+
+        <ul class="card-grid" id="business-grid"></ul>
+
+        <div class="empty-state" id="empty-state" hidden>
+          <p>No businesses match these filters. Try widening your distance or clearing your active filters.</p>
+          <button type="button" class="btn btn--ghost" id="clear-filters">Clear filters</button>
+        </div>
+      </section>
+    </div>
+
+    <!-- =======================================================
+         4. LIST YOUR BUSINESS CTA
+         ======================================================= -->
+    <section id="list-your-business" class="cta-band" aria-labelledby="cta-title">
+      <div class="container cta-band__inner">
+        <h2 id="cta-title" class="section-title">Own a business near campus?</h2>
+        <p>Listings are completely free for Black-owned businesses within 25 miles of LSU.</p>
+        <a href="#" class="btn btn--dark">Submit your listing</a>
+      </div>
+    </section>
+
+    <!-- =======================================================
+         5. MEET THE CREATORS
+         ======================================================= -->
+    <section id="creators" class="creators" aria-labelledby="creators-title">
+      <div class="container">
+        <h2 id="creators-title" class="section-title">Meet the Creators</h2>
+        <p class="creators__lede">
+          We're LSU students who got tired of scrolling for an hour to find a braider
+          who could fit us in before formal. So we built the list we wanted.
+        </p>
+        <ul class="creator-grid">
+          <li class="creator">
+            <span class="creator__avatar" aria-hidden="true" style="--chip: var(--blush)">JE</span>
+            <div>
+              <h3 class="creator__name">[Jasmyne Earle]</h3>
+              <p class="creator__role">Founder &amp; Project Lead</p>
+              <p class="creator__meta">Marketing Analytics, Class of 2026</p>
+              <a href="#" class="creator__link">Instagram</a>
+            </div>
+          </li>
+          <li class="creator">
+            <span class="creator__avatar" aria-hidden="true" style="--chip: var(--pistachio)">TN</span>
+            <div>
+              <h3 class="creator__name">[Teammate Name]</h3>
+              <p class="creator__role">Design &amp; Brand Identity</p>
+              <p class="creator__meta">Digital Art, Class of 2026</p>
+              <a href="#" class="creator__link">Instagram</a>
+            </div>
+          </li>
+          <li class="creator">
+            <span class="creator__avatar" aria-hidden="true" style="--chip: var(--cat-nails)">TN</span>
+            <div>
+              <h3 class="creator__name">[Teammate Name]</h3>
+              <p class="creator__role">Community &amp; Outreach</p>
+              <p class="creator__meta">Mass Communication, Class of 2025</p>
+              <a href="#" class="creator__link">LinkedIn</a>
+            </div>
+          </li>
+        </ul>
+      </div>
+    </section>
+  </main>
+
+  <!-- =======================================================
+       6. RECENTLY VIEWED TRAY (FIXED BOTTOM)
+       ======================================================= -->
+  <aside id="recently-viewed-tray" class="tray" aria-label="Recently viewed businesses" hidden>
+    <div class="tray__header">
+      <button type="button" class="tray__toggle" id="tray-toggle" aria-expanded="true" aria-controls="tray-body">
+        <span>Recently viewed</span>
+        <span class="tray__badge" id="tray-count">0</span>
+        <span class="tray__chevron" aria-hidden="true">▼</span>
+      </button>
+      <button type="button" class="tray__clear" id="tray-clear">Clear</button>
+    </div>
+    <div class="tray__body" id="tray-body">
+      <div class="tray__scroll" id="tray-list"></div>
+    </div>
+  </aside>
+
+  <!-- =======================================================
+       7. DM TOAST NOTIFICATION
+       ======================================================= -->
+  <div id="toast" class="toast" role="status" aria-live="polite" hidden>
+    <span>Message copied. Paste it in their DMs.</span>
+    <a id="toast-ig-link" class="toast__link" href="#" target="_blank" rel="noopener">Open Instagram DM</a>
+  </div>
+
+  <footer class="site-footer">
+    <div class="container">
+      <p>Built by LSU students. Not affiliated with Louisiana State University.</p>
+    </div>
+  </footer>
+
+  <!-- =======================================================
+       VANILLA JAVASCRIPT APPLICATION LOGIC
+       ======================================================= -->
+  <script>
+(() => {
+  "use strict";
+
+  /* =======================================================
+     1. CONFIG
+     ======================================================= */
+  const CATEGORIES = [
+    { id: "hair",        label: "Hair",        emoji: "💇🏾♀️", color: "var(--cat-hair)" },
+    { id: "nails",       label: "Nails",       emoji: "💅🏾",   color: "var(--cat-nails)" },
+    { id: "lashes",      label: "Lashes",      emoji: "👁️",    color: "var(--cat-lashes)" },
+    { id: "fashion",     label: "Fashion",     emoji: "🧥",    color: "var(--cat-fashion)" },
+    { id: "photography", label: "Photography", emoji: "📸",    color: "var(--cat-photography)" },
+    { id: "food",        label: "Food & Bev",  emoji: "🍽️",    color: "var(--cat-food)" },
+  ];
+
+  const ZONES = {
+    campus:  { order: 1, label: "Walk or bike",   range: "Under 2 mi",  maxMiles: 2 },
+    near:    { order: 2, label: "Quick drive",    range: "2–6 mi",      maxMiles: 6 },
+    metro:   { order: 3, label: "Around BR",      range: "6–15 mi",     maxMiles: 15 },
+    greater: { order: 4, label: "Worth the trip", range: "15–25 mi",    maxMiles: 25 },
+  };
+
+  const PRICE_RANGES = {
+    "$":    { order: 1, label: "Under $40" },
+    "$$":   { order: 2, label: "$40–$100" },
+    "$$$":  { order: 3, label: "$100–$200" },
+    "$$$$": { order: 4, label: "$200+" },
+  };
+
+  const HAIR_TYPES = [
+    { id: "type-3",  label: "Curly (3A–3C)" },
+    { id: "type-4",  label: "Coily (4A–4C)" },
+    { id: "locs",    label: "Locs" },
+    { id: "relaxed", label: "Relaxed / pressed" },
+    { id: "wigs",    label: "Wigs & units" },
+    { id: "mens",    label: "Men's cuts" },
+  ];
+
+  const CATEGORY_DEFAULTS = {
+    hair: {
+      description: "Specializing in healthy hair care, protective styles, and custom installs.",
+      specialties: ["Silk press", "Protective styling", "Custom installs", "Natural hair care"],
+    },
+    nails: {
+      description: "Custom nail artistry, structured overlays, and gel extensions.",
+      specialties: ["Gel-X sets", "Structured gel", "Nail art", "Pedicures"],
+    },
+    lashes: {
+      description: "Lash enhancements tailored to your eye shape and lifestyle.",
+      specialties: ["Classic lash sets", "Hybrid volume", "Lash fills", "Lash care"],
+    },
+    fashion: {
+      description: "Curated apparel, custom orders, and stylish statement pieces.",
+      specialties: ["Streetwear", "Custom pieces", "Game day fits", "Curated styles"],
+    },
+    photography: {
+      description: "Capturing authentic moments, milestone portraits, and lifestyle visuals.",
+      specialties: ["Grad portraits", "Headshots", "Creative shoots", "Event coverage"],
+    },
+    food: {
+      description: "Homemade dishes, custom baked goods, and savory Louisiana bites.",
+      specialties: ["Baked treats", "Soul food specials", "Catering & orders", "Custom treats"],
+    },
+  };
+
+  /* =======================================================
+     2. PROVIDER DATA
+     NOTE ON DATA: Only the Instagram handles below are real accounts
+     in the Baton Rouge area. All pricing, years of experience, locations,
+     and service details are temporary placeholders. Business owners should
+     review and verify their listing details before public launch.
+     ======================================================= */
+  const RAW_PROVIDERS = [
+    // hair
+    { handle: "anayaraestyledu", category: "hair", zone: "campus", priceRange: "$$", yearsExperience: 3, hairTypes: ["type-3", "type-4"] },
+    { handle: "hairbyydes", category: "hair", zone: "near", priceRange: "$$$", yearsExperience: 6, hairTypes: ["type-4", "wigs"] },
+    { handle: "iriasleekedit", category: "hair", zone: "metro", priceRange: "$$", yearsExperience: 2, hairTypes: ["type-4", "relaxed"], categoryGuess: true },
+
+    // nails
+    { handle: "nailzby_ki", category: "nails", zone: "campus", priceRange: "$", yearsExperience: 2 },
+    { handle: "morgnaileditt", category: "nails", zone: "near", priceRange: "$$", yearsExperience: 4 },
+
+    // lashes
+    { handle: "maddieminkss", category: "lashes", zone: "campus", priceRange: "$$", yearsExperience: 2 },
+    { handle: "thelashfairyb", category: "lashes", zone: "near", priceRange: "$$$", yearsExperience: 5 },
+    { handle: "_thelashbarb", category: "lashes", zone: "metro", priceRange: "$$", yearsExperience: 4 },
+
+    // fashion
+    { handle: "_kylieskollection", category: "fashion", zone: "near", priceRange: "$$", yearsExperience: 2 },
+    { handle: "beyondbasicke", category: "fashion", zone: "near", priceRange: "$$", yearsExperience: 3, categoryGuess: true },
+
+    // photography
+    { handle: "__timelessframes__", category: "photography", zone: "near", priceRange: "$$$", yearsExperience: 5 },
+    { handle: "treshotme", category: "photography", zone: "campus", priceRange: "$$", yearsExperience: 3 },
+    { handle: "lanisslenz", category: "photography", zone: "metro", priceRange: "$$$", yearsExperience: 4 },
+
+    // food
+    { handle: "leahsbayoubites", category: "food", zone: "metro", priceRange: "$", yearsExperience: 5 },
+    { handle: "bigbackbakerybylisa", category: "food", zone: "near", priceRange: "$$", yearsExperience: 6 },
+    { handle: "nadsmadeit", category: "food", zone: "near", priceRange: "$", yearsExperience: 3, categoryGuess: true },
+    { handle: "moni.madeit8", category: "food", zone: "greater", priceRange: "$", yearsExperience: 2, categoryGuess: true },
+  ];
+
+  function normalize(raw) {
+    const catDef = CATEGORY_DEFAULTS[raw.category] || { description: "", specialties: [] };
+    const slug = raw.handle.toLowerCase().replace(/[^a-z0-9_-]/g, "");
+    return {
+      id: slug,
+      handle: raw.handle,
+      displayName: null,
+      category: raw.category,
+      zone: raw.zone,
+      priceRange: raw.priceRange,
+      yearsExperience: raw.yearsExperience,
+      hairTypes: raw.hairTypes || [],
+      categoryGuess: Boolean(raw.categoryGuess),
+      description: catDef.description,
+      specialties: catDef.specialties,
+      studentDeal: null,
+      instagram: raw.handle,
+      tiktok: null,
+      verified: false,
+    };
+  }
+
+  const providers = RAW_PROVIDERS.map(normalize);
+
+  /* =======================================================
+     3. HELPERS
+     ======================================================= */
+  const byId = (list) => Object.fromEntries(list.map((x) => [x.id, x]));
+  const categoryMap = byId(CATEGORIES);
+  const hairTypeMap = byId(HAIR_TYPES);
+  const providerMap = Object.fromEntries(providers.map((p) => [p.id, p]));
+
+  function esc(value = "") {
+    return String(value)
+      .replaceAll("&", "&amp;")
+      .replaceAll("<", "&lt;")
+      .replaceAll(">", "&gt;")
+      .replaceAll('"', "&quot;")
+      .replaceAll("'", "&#39;");
+  }
+
+  function getExperienceTier(years) {
+    if (years >= 5) return "Seasoned";
+    if (years >= 2) return "Established";
+    return "Rising";
+  }
+
+  function formatYears(years) {
+    return `${years} ${years === 1 ? "yr" : "yrs"}`;
+  }
+
+  /* DOM references */
+  const form = document.getElementById("filter-form");
+  const els = {
+    grid: document.getElementById("business-grid"),
+    count: document.getElementById("result-count"),
+    title: document.getElementById("results-title"),
+    empty: document.getElementById("empty-state"),
+    clearBtn: document.getElementById("clear-filters"),
+    categoryOptions: document.getElementById("category-options"),
+    hairFilter: document.getElementById("hair-filter"),
+    hairOptions: document.getElementById("hair-type-options"),
+    tray: document.getElementById("recently-viewed-tray"),
+    trayList: document.getElementById("tray-list"),
+    trayCount: document.getElementById("tray-count"),
+    trayToggle: document.getElementById("tray-toggle"),
+    trayClear: document.getElementById("tray-clear"),
+    toast: document.getElementById("toast"),
+    toastIgLink: document.getElementById("toast-ig-link"),
+  };
+
+  /* =======================================================
+     4. FILTERING & RENDERING
+     ======================================================= */
+  function buildCategoryChips() {
+    const chips = [{ id: "all", label: "All", emoji: "✨", color: "var(--white)" }, ...CATEGORIES];
+    els.categoryOptions.innerHTML = chips.map((c, i) => `
+      <input type="radio" id="cat-${c.id}" name="category" value="${c.id}"
+             form="filter-form" class="visually-hidden" ${i === 0 ? "checked" : ""} />
+      <label for="cat-${c.id}" class="chip" style="--chip: ${c.color}">
+        <span aria-hidden="true">${c.emoji}</span> ${esc(c.label)}
+        <span class="chip__count" data-count-for="${c.id}">0</span>
+      </label>`).join("");
+  }
+
+  function buildHairTypeOptions() {
+    els.hairOptions.innerHTML = HAIR_TYPES.map((h) => `
+      <input type="checkbox" id="hair-${h.id}" name="hairType" value="${h.id}"
+             form="filter-form" class="visually-hidden" />
+      <label for="hair-${h.id}" class="check-pill">${esc(h.label)}</label>`).join("");
+  }
+
+  function renderStats() {
+    const set = (key, val) => {
+      const el = document.querySelector(`[data-stat="${key}"]`);
+      if (el) el.textContent = val;
+    };
+    set("businesses", providers.length);
+    set("categories", CATEGORIES.length);
+    set("campus", providers.filter((p) => p.zone === "campus").length);
+    set("miles", 25);
+  }
+
+  function readFilters() {
+    const fd = new FormData(form);
+    return {
+      q: String(fd.get("q") ?? "").trim().replace(/^@/, "").toLowerCase(),
+      zone: String(fd.get("zone") ?? "all"),
+      category: String(fd.get("category") ?? "all"),
+      dealsOnly: fd.get("dealsOnly") === "on",
+      hairTypes: fd.getAll("hairType"),
+      sort: String(fd.get("sort") ?? "distance"),
+    };
+  }
+
+  function matches(b, f, { ignoreCategory = false } = {}) {
+    if (!ignoreCategory && f.category !== "all" && b.category !== f.category) return false;
+    if (f.zone !== "all" && b.zone !== f.zone) return false;
+    if (f.dealsOnly && !b.studentDeal) return false;
+    if (f.category === "hair" && f.hairTypes.length) {
+      const bHairs = b.hairTypes ?? [];
+      if (!f.hairTypes.some((ht) => bHairs.includes(ht))) return false;
+    }
+    if (f.q) {
+      const catLabel = categoryMap[b.category]?.label || "";
+      const zoneData = ZONES[b.zone] || {};
+      const hairLabels = (b.hairTypes || []).map((ht) => hairTypeMap[ht]?.label || "").join(" ");
+      const haystack = [
+        b.handle,
+        b.displayName || "",
+        b.description,
+        catLabel,
+        zoneData.label || "",
+        zoneData.range || "",
+        hairLabels,
+        ...b.specialties
+      ].join(" ").toLowerCase();
+
+      if (!haystack.includes(f.q)) return false;
+    }
+    return true;
+  }
+
+  const SORTERS = {
+    distance: (a, b) => (ZONES[a.zone]?.order || 99) - (ZONES[b.zone]?.order || 99),
+    price: (a, b) => (PRICE_RANGES[a.priceRange]?.order || 99) - (PRICE_RANGES[b.priceRange]?.order || 99),
+    experience: (a, b) => b.yearsExperience - a.yearsExperience,
+  };
+
+  function cardHTML(b) {
+    const cat = categoryMap[b.category] || { label: b.category, emoji: "✨", color: "var(--blush)" };
+    const zone = ZONES[b.zone] || { label: b.zone, range: "" };
+    const price = PRICE_RANGES[b.priceRange] || { label: b.priceRange };
+    const tier = getExperienceTier(b.yearsExperience);
+    const detailsId = `details-${b.id}`;
+    const hairTypeLabels = (b.hairTypes || []).map((id) => hairTypeMap[id]?.label).filter(Boolean);
+
+    return `
+      <li class="card" data-id="${b.id}" style="--chip: ${cat.color}">
+        <div class="card__top">
+          <span class="card__cat">${cat.emoji} ${esc(cat.label)}</span>
+          <span class="card__dist">${esc(zone.range)} from LSU</span>
+        </div>
+        <div class="card__body">
+          <h3 class="card__name">@${esc(b.handle)}</h3>
+          ${b.categoryGuess ? `<span class="badge badge--guess">Category estimated</span>` : ""}
+          <p class="card__desc">${esc(b.description)}</p>
+
+          <ul class="tags">
+            <li class="tag" title="${esc(price.label)}">${esc(b.priceRange)} (${esc(price.label)})</li>
+            <li class="tag">${tier}, ${formatYears(b.yearsExperience)}</li>
+            ${b.studentDeal ? `<li class="tag tag--deal">🎓 Student deal</li>` : ""}
+          </ul>
+
+          ${!b.verified ? `
+            <div class="card__unverified">
+              Details being confirmed. Check their page for current prices.
+            </div>` : ""}
+
+          <div class="card__details" id="${detailsId}" hidden>
+            <div>
+              <h4>Services</h4>
+              <ul>${b.specialties.map((s) => `<li>${esc(s)}</li>`).join("")}</ul>
+            </div>
+            ${hairTypeLabels.length ? `<div><h4>Hair types</h4><p>${hairTypeLabels.map(esc).join(", ")}</p></div>` : ""}
+            ${b.studentDeal ? `<div><h4>Student deal</h4><p>${esc(b.studentDeal)}</p></div>` : ""}
+            <div><h4>Pricing range</h4><p>${esc(b.priceRange)} — ${esc(price.label)}</p></div>
+          </div>
+
+          <div class="card__actions">
+            <button type="button" class="btn btn--primary btn--copy" data-action="copy-dm" data-handle="${esc(b.handle)}">
+              Copy booking message
+            </button>
+            <button type="button" class="btn btn--ghost btn--details" data-action="toggle-details" aria-expanded="false" aria-controls="${detailsId}">
+              Details
+            </button>
+            <a class="btn btn--ghost" href="https://www.instagram.com/${encodeURIComponent(b.instagram)}/" target="_blank" rel="noopener" data-action="social" aria-label="${esc(b.handle)} on Instagram">
+              Instagram
+            </a>
+            ${b.tiktok ? `
+              <a class="btn btn--ghost" href="https://www.tiktok.com/@${encodeURIComponent(b.tiktok)}" target="_blank" rel="noopener" data-action="social" aria-label="${esc(b.handle)} on TikTok">
+                TikTok
+              </a>` : ""}
+          </div>
+        </div>
+      </li>`;
+  }
+
+  function render() {
+    const f = readFilters();
+    const visible = providers.filter((b) => matches(b, f)).sort(SORTERS[f.sort] || SORTERS.distance);
+
+    els.grid.innerHTML = visible.map(cardHTML).join("");
+    els.count.textContent = `${visible.length} ${visible.length === 1 ? "business" : "businesses"}`;
+    els.empty.hidden = visible.length > 0;
+    els.hairFilter.hidden = f.category !== "hair";
+
+    // Dynamic Title heading
+    const catLabel = f.category === "all" ? "All businesses" : (categoryMap[f.category]?.label || f.category);
+    els.title.textContent = f.zone === "all" ? catLabel : `${catLabel}: ${ZONES[f.zone]?.label.toLowerCase() || f.zone}`;
+
+    // Live Category counts (reflect all filters EXCEPT category)
+    const pool = providers.filter((b) => matches(b, f, { ignoreCategory: true }));
+    document.querySelectorAll("[data-count-for]").forEach((el) => {
+      const catId = el.dataset.countFor;
+      el.textContent = catId === "all" ? pool.length : pool.filter((p) => p.category === catId).length;
+    });
+  }
+
+  function clearFilters() {
+    form.reset();
+    render();
+  }
+
+  /* =======================================================
+     5. RECENTLY VIEWED TRAY
+     ======================================================= */
+  const RECENT_KEY = "blackOwnedBR:recentlyViewed";
+  const RECENT_MAX = 8;
+
+  function getRecent() {
+    try {
+      const stored = JSON.parse(localStorage.getItem(RECENT_KEY) ?? "[]");
+      return Array.isArray(stored) ? stored.filter((id) => providerMap[id]) : [];
+    } catch {
+      return [];
+    }
+  }
+
+  function saveRecent(ids) {
+    try {
+      localStorage.setItem(RECENT_KEY, JSON.stringify(ids));
+    } catch {
+      /* storage quota or access blocked */
+    }
+  }
+
+  function trackView(id) {
+    if (!providerMap[id]) return;
+    const current = getRecent().filter((x) => x !== id);
+    const updated = [id, ...current].slice(0, RECENT_MAX);
+    saveRecent(updated);
+    renderRecent();
+  }
+
+  function removeRecent(id) {
+    const updated = getRecent().filter((x) => x !== id);
+    saveRecent(updated);
+    renderRecent();
+  }
+
+  function updateTrayPadding() {
+    if (els.tray.hidden) {
+      document.documentElement.style.setProperty("--tray-height", "0px");
+    } else {
+      const h = els.tray.offsetHeight || 0;
+      document.documentElement.style.setProperty("--tray-height", `${h}px`);
+    }
+  }
+
+  function renderRecent() {
+    const ids = getRecent();
+    if (ids.length === 0) {
+      els.tray.hidden = true;
+      updateTrayPadding();
+      return;
+    }
+
+    els.tray.hidden = false;
+    els.trayCount.textContent = ids.length;
+
+    els.trayList.innerHTML = ids.map((id) => {
+      const b = providerMap[id];
+      const cat = categoryMap[b.category] || { label: b.category, emoji: "✨", color: "var(--blush)" };
+      const zone = ZONES[b.zone] || { range: "" };
+
+      return `
+        <div class="tray-card" data-tray-id="${id}" style="--chip: ${cat.color}">
+          <div class="tray-card__top">
+            <span class="tray-card__name">@${esc(b.handle)}</span>
+            <button type="button" class="tray-card__remove" data-action="remove-recent" data-id="${id}" aria-label="Remove from recently viewed">×</button>
+          </div>
+          <span class="tray-card__cat">${cat.emoji} ${esc(cat.label)}</span>
+          <table class="tray-card__table">
+            <tr><td>Price</td><td><strong>${esc(b.priceRange)}</strong></td></tr>
+            <tr><td>Dist</td><td><strong>${esc(zone.range)}</strong></td></tr>
+            <tr><td>Exp</td><td><strong>${b.yearsExperience} yrs</strong></td></tr>
+          </table>
+        </div>`;
+    }).join("");
+
+    updateTrayPadding();
+  }
+
+  function openProvider(id) {
+    let card = els.grid.querySelector(`[data-id="${id}"]`);
+    if (!card) {
+      clearFilters();
+      card = els.grid.querySelector(`[data-id="${id}"]`);
+    }
+    if (!card) return;
+
+    const btn = card.querySelector('[data-action="toggle-details"]');
+    if (btn && btn.getAttribute("aria-expanded") !== "true") {
+      toggleDetails(btn);
+    }
+
+    const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    card.scrollIntoView({ behavior: reduce ? "auto" : "smooth", block: "center" });
+    card.classList.add("is-highlighted");
+    setTimeout(() => card.classList.remove("is-highlighted"), 1600);
+    if (btn) btn.focus({ preventScroll: true });
+  }
+
+  function toggleDetails(btn) {
+    const details = document.getElementById(btn.getAttribute("aria-controls"));
+    const open = btn.getAttribute("aria-expanded") === "true";
+    btn.setAttribute("aria-expanded", String(!open));
+    btn.textContent = open ? "Details" : "Hide details";
+    if (details) details.hidden = open;
+  }
+
+  /* =======================================================
+     6. DM TEMPLATE GENERATOR
+     ======================================================= */
+  function buildDMMessage(provider) {
+    const f = readFilters();
+    const selectedHairLabels = f.hairTypes
+      .map((id) => hairTypeMap[id]?.label)
+      .filter(Boolean)
+      .join(", ");
+
+    let interest = "an inquiry";
+    let bullets = [];
+
+    switch (provider.category) {
+      case "hair":
+        interest = "a hair appointment";
+        bullets = [
+          "Style I'm looking for: ",
+          `Hair type: ${selectedHairLabels}`,
+          "Length: ",
+          "Date I'm hoping for: ",
+          "Budget: "
+        ];
+        break;
+      case "nails":
+        interest = "a nail appointment";
+        bullets = [
+          "Set / style: ",
+          "Length & shape: ",
+          "Date I'm hoping for: ",
+          "Budget: "
+        ];
+        break;
+      case "lashes":
+        interest = "a lash appointment";
+        bullets = [
+          "Full set or fill: ",
+          "Style (classic, hybrid, volume): ",
+          "Date I'm hoping for: "
+        ];
+        break;
+      case "fashion":
+        interest = "to place an order";
+        bullets = [
+          "Item(s): ",
+          "Size: ",
+          "Pickup or shipping: "
+        ];
+        break;
+      case "photography":
+        interest = "a photo session";
+        bullets = [
+          "Type of shoot (grad, headshots, event): ",
+          "Location idea: ",
+          "Date: ",
+          "Budget: "
+        ];
+        break;
+      case "food":
+        interest = "to place an order";
+        bullets = [
+          "What I'd like: ",
+          "Quantity / number of people: ",
+          "Pickup date & time: "
+        ];
+        break;
+      default:
+        interest = "your services";
+        bullets = ["Details: ", "Date I'm hoping for: "];
+    }
+
+    const bulletLines = bullets.map((b) => `• ${b}`).join("\n");
+    return `Hi! 👋 I found you on Black-Owned BR, the LSU student directory.\nI'm interested in ${interest}.\n\n${bulletLines}\n\nDo you have availability? Thank you!`;
+  }
+
+  async function copyToClipboard(text) {
+    if (navigator.clipboard && window.isSecureContext) {
+      try {
+        await navigator.clipboard.writeText(text);
+        return true;
+      } catch {
+        /* proceed to fallback */
+      }
+    }
+    const ta = document.createElement("textarea");
+    ta.value = text;
+    ta.style.position = "fixed";
+    ta.style.left = "-9999px";
+    ta.style.top = "-9999px";
+    ta.setAttribute("readonly", "");
+    document.body.appendChild(ta);
+    ta.select();
+    let res = false;
+    try {
+      res = document.execCommand("copy");
+    } catch {
+      res = false;
+    }
+    document.body.removeChild(ta);
+    return res;
+  }
+
+  let toastTimer = null;
+  function showToast(handle) {
+    els.toastIgLink.href = `https://ig.me/m/${encodeURIComponent(handle)}`;
+    els.toast.hidden = false;
+    els.toast.classList.add("is-visible");
+
+    if (toastTimer) clearTimeout(toastTimer);
+    toastTimer = setTimeout(() => {
+      els.toast.classList.remove("is-visible");
+      els.toast.hidden = true;
+    }, 5000);
+  }
+
+  /* =======================================================
+     7. EVENTS + INIT
+     ======================================================= */
+  // Filter inputs listener on document
+  const onFilterChange = (e) => {
+    if (e.target.form === form || e.target.getAttribute("form") === "filter-form") {
+      render();
+    }
+  };
+  document.addEventListener("input", onFilterChange);
+  document.addEventListener("change", onFilterChange);
+
+  // Grid Event Delegation
+  els.grid.addEventListener("click", async (e) => {
+    const card = e.target.closest(".card");
+    if (card) {
+      const id = card.dataset.id;
+      trackView(id);
+    }
+
+    const btn = e.target.closest("[data-action]");
+    if (!btn) return;
+    const action = btn.dataset.action;
+
+    if (action === "toggle-details") {
+      toggleDetails(btn);
+    } else if (action === "copy-dm") {
+      const handle = btn.dataset.handle;
+      const provider = providers.find((p) => p.handle === handle);
+      if (provider) {
+        const msg = buildDMMessage(provider);
+        await copyToClipboard(msg);
+        const originalText = btn.textContent;
+        btn.textContent = "Copied!";
+        btn.classList.add("is-copied");
+        setTimeout(() => {
+          btn.textContent = originalText;
+          btn.classList.remove("is-copied");
+        }, 2000);
+        showToast(handle);
+      }
+    }
+  });
+
+  // Tray Event Delegation
+  els.trayList.addEventListener("click", (e) => {
+    const removeBtn = e.target.closest('[data-action="remove-recent"]');
+    if (removeBtn) {
+      e.stopPropagation();
+      removeRecent(removeBtn.dataset.id);
+      return;
+    }
+
+    const trayCard = e.target.closest(".tray-card");
+    if (trayCard) {
+      openProvider(trayCard.dataset.trayId);
+    }
+  });
+
+  // Tray controls
+  els.trayToggle.addEventListener("click", () => {
+    const isCollapsed = els.tray.classList.toggle("tray--collapsed");
+    els.trayToggle.setAttribute("aria-expanded", String(!isCollapsed));
+    updateTrayPadding();
+  });
+
+  els.trayClear.addEventListener("click", () => {
+    saveRecent([]);
+    renderRecent();
+  });
+
+  els.clearBtn.addEventListener("click", clearFilters);
+
+  window.addEventListener("resize", updateTrayPadding);
+
+  /* INIT */
+  buildCategoryChips();
+  buildHairTypeOptions();
+  renderStats();
+  renderRecent();
+  render();
+})();
+  </script>
+</body>
+</html>
